@@ -11,43 +11,19 @@ class Track
     @segments = segment_objects
   end
 
-  def get_track_json()
-    j = '{'
-    j += '"type": "Feature", '
-    if @name != nil
-      j+= '"properties": {'
-      j += '"title": "' + @name + '"'
-      j += '},'
-    end
-    j += '"geometry": {'
-    j += '"type": "MultiLineString",'
-    j +='"coordinates": ['
-    # Loop through all the segment objects
-    @segments.each_with_index do |s, index|
-      if index > 0
-        j += ","
-      end
-      j += '['
-      # Loop through all the coordinates in the segment
-      tsj = ''
-      s.coordinates.each do |c|
-        if tsj != ''
-          tsj += ','
-        end
-        # Add the coordinate
-        tsj += '['
-        tsj += "#{c.lon},#{c.lat}"
-        if c.ele != nil
-          tsj += ",#{c.ele}"
-        end
-        tsj += ']'
-      end
-      j+=tsj
-      j+=']'
-    end
-    j + ']}}'
+  def to_geojson()
+    {
+      type: 'Feature', 
+      properties: { title: @name }, 
+      geometry:{
+        type: 'MiltiLineString', 
+        coordinates: @segments.map { |segments| segment.to_geojson }
+
+      }
+    }
   end
 end
+
 class TrackSegment
   attr_reader :coordinates
   def initialize(coordinates)
@@ -68,8 +44,6 @@ end
 
 class Waypoint
 
-
-
 attr_reader :lat, :lon, :ele, :name, :type
 
   def initialize(lon, lat, ele=nil, name=nil, type=nil)
@@ -80,56 +54,38 @@ attr_reader :lat, :lon, :ele, :name, :type
     @type = type
   end
 
-  def get_waypoint_json(indent=0)
-    j = '{"type": "Feature",'
-    # if name is not nil or type is not nil
-    j += '"geometry": {"type": "Point","coordinates": '
-    j += "[#{@lon},#{@lat}"
-    if ele != nil
-      j += ",#{@ele}"
-    end
-    j += ']},'
-    if name != nil or type != nil
-      j += '"properties": {'
-      if name != nil
-        j += '"title": "' + @name + '"'
-      end
-      if type != nil  # if type is not nil
-        if name != nil
-          j += ','
-        end
-        j += '"icon": "' + @type + '"'  # type is the icon
-      end
-      j += '}'
-    end
-    j += "}"
-    return j
+  def to_geojson(indent=0)
+    {
+      "type": "Feature",
+        geometry:{
+          type: 'Point',
+          coordinates: "[#{@lon}, #{@lat}]"
+        },
+        properties: {
+          title: @name, 
+          icon: @type
+        }
+    }
   end
-end
+end 
 
 class World
-def initialize(name, things)
+def initialize(name, features = [])
   @name = name
-  @features = things
+  @features = features
 end
-  def add_feature(f)
-    @features.append(t)
+  def add_feature(feature)
+    @features.append(feature)
   end
 
   def to_geojson(indent=0)
-    # Write stuff
-    s = '{"type": "FeatureCollection","features": ['
-    @features.each_with_index do |f,i|
-      if i != 0
-        s +=","
-      end
-        if f.class == Track
-            s += f.get_track_json
-        elsif f.class == Waypoint
-            s += f.get_waypoint_json
-      end
-    end
-    s + "]}"
+    # translates output to json 
+    {
+      type: 'FeatureCollection', 
+      #applies to_geojson method to each element in features and then puts that in a new array
+      features: @features.map { |feature| feature.to_geojson }
+
+    }
   end
 end
 

@@ -1,4 +1,14 @@
+
+
 ## GIS Tool
+Abbey Hankins 
+CS361 Fall 2024 Final
+
+##Changes Made
+changed name of variables 
+added a to_geojson function to each class that formats the output in json 
+
+- 
 
 Geographic Information Systems program.
 
