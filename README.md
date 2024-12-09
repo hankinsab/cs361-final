@@ -6,7 +6,12 @@ CS361 Fall 2024 Final
 
 ##Changes Made
 changed name of variables 
-added a to_geojson function to each class that formats the output in json 
+made point a super class of waypoint 
+refactored for loops into one line conversions for converting objects 
+added a to_geojson function to each class that outputs json 
+  - this function takes in another method, geojson_hash
+  - geojson_hash outputs a hash, then to_geojson converts it to a string for json 
+  - makes it easier to add features and take them away 
 
 - 
 
